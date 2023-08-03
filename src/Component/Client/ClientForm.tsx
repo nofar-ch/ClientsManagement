@@ -2,7 +2,6 @@ import { InputText } from 'primereact/inputtext';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { ClientFormView } from '../../Model/Client/ClientFormView.model';
 import { FooterContent } from '../Common/Form/FooterContent';
-import { useEffect } from 'react';
 
 export const ClientForm = ({
   onSubmitFun,

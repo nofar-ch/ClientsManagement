@@ -10,6 +10,7 @@ import { SubmitHandler } from 'react-hook-form';
 import { CreateClient } from '../../Model/Client/CreateClient.model';
 import configData from '../Common/Config/config.json';
 import { DeleteClient } from '../../Model/Client/DeleteClient.model';
+import { ConfirmForm } from '../Common/Form/ConfirmForm';
 
 type lazyParamsType = {
   page: number;
@@ -19,13 +20,13 @@ type lazyParamsType = {
 
 export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);
-  const [visible, setVisible] = useState<boolean>(false);
+  const [dialogContent, setDialogContent] = useState<JSX.Element | null>(null);
+
   const initialLazyParams = {
     page: configData.PAGE,
     size: configData.SIZE,
     sortBy: configData.SORT_BY,
   };
-  console.log(initialLazyParams);
 
   const [lazyParams, setLazyParams] =
     useState<lazyParamsType>(initialLazyParams);
@@ -91,7 +92,7 @@ export const ClientList = () => {
             summary: 'Success',
             detail: 'Client added',
           });
-          setVisible(false);
+          setDialogContent(null);
           fetchClientData(initialLazyParams);
         }
       })
@@ -100,39 +101,66 @@ export const ClientList = () => {
       });
   };
 
-  const deleteClient = (client: ClientDto) => {
-    const clientDelete = new DeleteClient(client.id);
-    fetch('http://localhost:5071/api/Client/deleteClient', {
-      method: 'DELETE',
-      body: JSON.stringify(clientDelete),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
+  const deleteClient = (clientId: string) => {
+    if (clientId) {
+      const clientDelete = new DeleteClient(clientId);
+      fetch('http://localhost:5071/api/Client/deleteClient', {
+        method: 'DELETE',
+        body: JSON.stringify(clientDelete),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
-      .then((data: BaseResponseDto<ClientDto>) => {
-        if (data.isSuccess) {
+        .then((response) => {
+          if (!response.ok) {
+            toastRef?.current?.show({
+              severity: 'error',
+              summary: 'Failed',
+              detail: 'Delete client failed',
+            });
+          }
+          return response.json();
+        })
+        .then((data: BaseResponseDto<ClientDto>) => {
+          if (data.isSuccess) {
+            toastRef?.current?.show({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Client deleted',
+            });
+            setDialogContent(null);
+            fetchClientData(initialLazyParams);
+          }
+        })
+        .catch((error) => {
           toastRef?.current?.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Client deleted',
+            severity: 'error',
+            summary: 'Failed',
+            detail: 'Delete client failed',
           });
-          setVisible(false);
-          fetchClientData(initialLazyParams);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching client data:', error);
-      });
+        });
+    } else {
+      console.error('can not find client id');
+    }
   };
 
-  const showForm = () => {
-    setVisible(true);
+  const showAddClientForm = () => {
+    setDialogContent(
+      <ClientForm
+        onSubmitFun={addClient}
+        hideDialog={() => setDialogContent(null)}
+      />
+    );
+  };
+
+  const showDeleteClientForm = (clientId: string) => {
+    setDialogContent(
+      <ConfirmForm
+        clientId={clientId}
+        onSubmitFun={deleteClient}
+        cancelFun={() => setDialogContent(null)}
+      />
+    );
   };
 
   return (
@@ -143,8 +171,14 @@ export const ClientList = () => {
         <DataTable
           value={values}
           paginator
+          onPage={(event) =>
+            setLazyParams({
+              ...lazyParams,
+              page: event.page ?? lazyParams.page,
+            })
+          }
           rows={lazyParams.size}
-          tableStyle={{ minWidth: '50rem' }}
+          tableStyle={{ minWidth: '40rem' }}
         >
           <Column field='id' header='Id' style={{ width: '25%' }}></Column>
           <Column
@@ -166,17 +200,17 @@ export const ClientList = () => {
             field='actions'
             header={(options) => (
               <Button
-                onClick={() => showForm()}
+                onClick={() => showAddClientForm()}
                 icon='pi pi-plus'
                 className={'p-button-text'}
               />
             )}
             style={{ width: '25%' }}
-            body={(client) => {
+            body={(client: ClientDto) => {
               return (
                 <div className='flex'>
                   <Button
-                    onClick={() => deleteClient(client)}
+                    onClick={() => showDeleteClientForm(client.id)}
                     icon='pi pi-times text-red-500'
                     className='p-button-text'
                   />
@@ -188,14 +222,11 @@ export const ClientList = () => {
 
         <Dialog
           header='Add a new client'
-          visible={visible}
+          visible={!!dialogContent}
           style={{ width: '35vw' }}
-          onHide={() => setVisible(false)}
+          onHide={() => setDialogContent(null)}
         >
-          <ClientForm
-            onSubmitFun={addClient}
-            hideDialog={() => setVisible(false)}
-          />
+          {dialogContent}
         </Dialog>
       </div>
     </>
