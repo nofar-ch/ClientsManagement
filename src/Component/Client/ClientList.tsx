@@ -15,7 +15,6 @@ import { ClientDto } from '../../Model/Client/ClientDto.model';
 import { BaseResponseDto } from '../../Model/Response/BaseResponseDto.model';
 import { GeoLocation } from './GeoLocation';
 import { LazyParamsType } from '../../Types/Common/LazyParamsType';
-import { classNames } from 'primereact/utils';
 
 export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);

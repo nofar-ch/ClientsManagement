@@ -13,7 +13,10 @@ export const ConfirmForm = ({
   return (
     <form
       className='flex flex-column justify-content-start align-items-start'
-      onSubmit={() => onSubmitFun(clientId)}
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmitFun(clientId);
+      }}
     >
       <span className='text-xl'>{`Id ${clientId} will delete`}</span>
       <span className='text-xl font-semibold mb-4'>Are you sure?</span>
