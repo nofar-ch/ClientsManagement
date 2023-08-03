@@ -1,5 +1,5 @@
 import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import { Column, ColumnBodyOptions } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { useEffect, useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
@@ -13,11 +13,20 @@ import { DeleteClient } from '../../Model/Client/DeleteClient.model';
 import { ConfirmForm } from '../Common/Form/ConfirmForm';
 import { ClientDto } from '../../Model/Client/ClientDto.model';
 import { BaseResponseDto } from '../../Model/Response/BaseResponseDto.model';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { GeoLocation } from './GeoLocation';
 
 type lazyParamsType = {
   page: number;
   size: number;
-  sortBy: string;
+  filters:
+    | {
+        id: { value: string | null; matchMode: string };
+        fullName: { value: string | null; matchMode: string };
+        phoneNumber: { value: string | null; matchMode: string };
+        ipAddress: { value: string | null; matchMode: string };
+      }
+    | {};
 };
 
 export const ClientList = () => {
@@ -26,17 +35,19 @@ export const ClientList = () => {
   const [dialogProps, setDialogProps] = useState<Partial<DialogProps>>();
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filters, setFilters] = useState<lazyParamsType['filters']>({});
 
   const initialLazyParams = {
     page: configData.PAGE,
     size: configData.SIZE,
-    sortBy: configData.SORT_BY,
+    filters: {},
   };
 
   const [lazyParams, setLazyParams] =
     useState<lazyParamsType>(initialLazyParams);
 
   const toastRef = useRef<Toast>(null);
+  const op = useRef<OverlayPanel>(null);
 
   useEffect(() => {
     fetchClientData(lazyParams);
@@ -44,8 +55,10 @@ export const ClientList = () => {
 
   const fetchClientData = (lazyParams: lazyParamsType) => {
     setIsLoading(true);
+    const _filters = objectToQueryString();
+    debugger;
     fetch(
-      `http://localhost:5071/api/Client?page=${lazyParams.page}&size=${lazyParams.size}&sortby=${lazyParams.sortBy}`,
+      `http://localhost:5071/api/Client?page=${lazyParams.page}&size=${lazyParams.size}&${_filters}`,
       {
         method: 'GET',
         headers: {
@@ -146,7 +159,7 @@ export const ClientList = () => {
           });
         });
     } else {
-      console.error('can not find client id');
+      console.error('client id not found');
     }
   };
 
@@ -171,6 +184,30 @@ export const ClientList = () => {
     );
   };
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setLazyParams({ ...lazyParams, filters: filters });
+    }, 500);
+
+    return () => {
+      clearTimeout(delayDebounceFn);
+    };
+  }, [filters]);
+
+  const objectToQueryString = () => {
+    const queryString = Object.keys(lazyParams.filters)
+      .filter((key) => lazyParams.filters[key].value !== null)
+      .map(
+        (key) =>
+          `filter${encodeURIComponent(key)}=${encodeURIComponent(
+            lazyParams.filters[key].value
+          )}`
+      )
+      .join('&');
+
+    return queryString;
+  };
+
   return (
     <>
       <Toast ref={toastRef} />
@@ -182,6 +219,7 @@ export const ClientList = () => {
           dataKey='id'
           paginator
           loading={isLoading}
+          filterDisplay='row'
           first={lazyParams.page}
           rows={lazyParams.size}
           totalRecords={totalCount}
@@ -191,30 +229,46 @@ export const ClientList = () => {
               page: event.page ?? lazyParams.page,
             });
           }}
-          //onSort={onSort}
-          //sortField={lazyState.sortField}
-          //sortOrder={lazyState.sortOrder}
-          //onFilter={onFilter} filters={lazyState.filters}
+          onFilter={(event) => setFilters(event.filters)}
           tableStyle={{ minWidth: '40rem' }}
         >
-          <Column field='id' header='Id' style={{ width: '25%' }}></Column>
+          <Column
+            field='id'
+            header='Id'
+            style={{ width: '25%' }}
+            showFilterMenu={false}
+            filter
+          ></Column>
           <Column
             field='fullName'
             header='FullName'
+            showFilterMenu={false}
             style={{ width: '25%' }}
+            filter
           ></Column>
           <Column
             field='phoneNumber'
             header='PhoneNumber'
+            showFilterMenu={false}
             style={{ width: '25%' }}
+            filter
           ></Column>
           <Column
             field='ipAddress'
             header='IpAddress'
+            showFilterMenu={false}
             style={{ width: '25%' }}
+            filter
+            body={(client: ClientDto) => (
+              <>
+                {client.ipAddress}
+                <GeoLocation ipAddress={client.ipAddress} />
+              </>
+            )}
           ></Column>
           <Column
             field='actions'
+            showFilterMenu={false}
             header={(options) => (
               <Button
                 onClick={() => showAddClientForm()}
