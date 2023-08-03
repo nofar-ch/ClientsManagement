@@ -1,6 +1,6 @@
 
 class DeleteClient {
-    id: string;
+    public id!: string;
 
     constructor(data: UpdateClient) {
         Object.assign(this, data)
