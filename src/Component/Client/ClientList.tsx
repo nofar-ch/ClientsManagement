@@ -11,6 +11,8 @@ import { CreateClient } from '../../Model/Client/CreateClient.model';
 import configData from '../Common/Config/config.json';
 import { DeleteClient } from '../../Model/Client/DeleteClient.model';
 import { ConfirmForm } from '../Common/Form/ConfirmForm';
+import { ClientDto } from '../../Model/Client/ClientDto.model';
+import { BaseResponseDto } from '../../Model/Response/BaseResponseDto.model';
 
 type lazyParamsType = {
   page: number;
@@ -22,6 +24,8 @@ export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);
   const [dialogContent, setDialogContent] = useState<JSX.Element | null>(null);
   const [dialogProps, setDialogProps] = useState<Partial<DialogProps>>();
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const initialLazyParams = {
     page: configData.PAGE,
@@ -36,14 +40,12 @@ export const ClientList = () => {
 
   useEffect(() => {
     fetchClientData(lazyParams);
-  }, []);
+  }, [lazyParams]);
 
   const fetchClientData = (lazyParams: lazyParamsType) => {
+    setIsLoading(true);
     fetch(
-      `http://localhost:5071/api/Client?
-      page=${lazyParams.page}
-      &size=${lazyParams.size}
-      &sortby=${lazyParams.sortBy}`,
+      `http://localhost:5071/api/Client?page=${lazyParams.page}&size=${lazyParams.size}&sortby=${lazyParams.sortBy}`,
       {
         method: 'GET',
         headers: {
@@ -60,10 +62,13 @@ export const ClientList = () => {
       .then((data: BaseResponseDto<ClientDto>) => {
         if (data.isSuccess) {
           setValues(data?.data ?? []);
+          setTotalCount(data?.totalCount);
         }
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching client data:', error);
+        setIsLoading(false);
       });
   };
 
@@ -94,7 +99,7 @@ export const ClientList = () => {
             detail: 'Client added',
           });
           setDialogContent(null);
-          fetchClientData(initialLazyParams);
+          setLazyParams(initialLazyParams);
         }
       })
       .catch((error) => {
@@ -130,7 +135,7 @@ export const ClientList = () => {
               detail: 'Client deleted',
             });
             setDialogContent(null);
-            fetchClientData(initialLazyParams);
+            setLazyParams(initialLazyParams);
           }
         })
         .catch((error) => {
@@ -172,15 +177,24 @@ export const ClientList = () => {
 
       <div className='card'>
         <DataTable
+          lazy
           value={values}
+          dataKey='id'
           paginator
-          onPage={(event) =>
+          loading={isLoading}
+          first={lazyParams.page}
+          rows={lazyParams.size}
+          totalRecords={totalCount}
+          onPage={(event) => {
             setLazyParams({
               ...lazyParams,
               page: event.page ?? lazyParams.page,
-            })
-          }
-          rows={lazyParams.size}
+            });
+          }}
+          //onSort={onSort}
+          //sortField={lazyState.sortField}
+          //sortOrder={lazyState.sortOrder}
+          //onFilter={onFilter} filters={lazyState.filters}
           tableStyle={{ minWidth: '40rem' }}
         >
           <Column field='id' header='Id' style={{ width: '25%' }}></Column>
