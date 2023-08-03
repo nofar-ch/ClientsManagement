@@ -4,7 +4,7 @@ import { Button } from 'primereact/button';
 import { useEffect, useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { ClientForm } from './ClientForm';
-import { Dialog } from 'primereact/dialog';
+import { Dialog, DialogProps } from 'primereact/dialog';
 import { ClientFormView } from '../../Model/Client/ClientFormView.model';
 import { SubmitHandler } from 'react-hook-form';
 import { CreateClient } from '../../Model/Client/CreateClient.model';
@@ -21,6 +21,7 @@ type lazyParamsType = {
 export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);
   const [dialogContent, setDialogContent] = useState<JSX.Element | null>(null);
+  const [dialogProps, setDialogProps] = useState<Partial<DialogProps>>();
 
   const initialLazyParams = {
     page: configData.PAGE,
@@ -145,6 +146,7 @@ export const ClientList = () => {
   };
 
   const showAddClientForm = () => {
+    setDialogProps({ header: 'Add a new client' });
     setDialogContent(
       <ClientForm
         onSubmitFun={addClient}
@@ -154,6 +156,7 @@ export const ClientList = () => {
   };
 
   const showDeleteClientForm = (clientId: string) => {
+    setDialogProps({ header: 'Delete client' });
     setDialogContent(
       <ConfirmForm
         clientId={clientId}
@@ -221,7 +224,7 @@ export const ClientList = () => {
         </DataTable>
 
         <Dialog
-          header='Add a new client'
+          {...dialogProps}
           visible={!!dialogContent}
           style={{ width: '35vw' }}
           onHide={() => setDialogContent(null)}

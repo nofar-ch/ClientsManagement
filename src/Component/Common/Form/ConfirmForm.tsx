@@ -15,8 +15,11 @@ export const ConfirmForm = ({
       className='flex flex-column justify-content-start align-items-start'
       onSubmit={() => onSubmitFun(clientId)}
     >
-      <h1>{`${clientId} will delete, Are you sure?`}</h1>
-      <FooterContent cancelFun={cancelFun} />
+      <span className='text-xl'>{`Id ${clientId} will delete`}</span>
+      <span className='text-xl font-semibold'>Are you sure?</span>
+      <div className='mt-4'>
+        <FooterContent cancelFun={cancelFun} />
+      </div>
     </form>
   );
 };
