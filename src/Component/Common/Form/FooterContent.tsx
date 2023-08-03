@@ -7,7 +7,7 @@ export const FooterContent = ({
   cancelFun: MouseEventHandler<HTMLButtonElement>;
 }) => {
   return (
-    <div className='card flex flex-wrap gap-2 justify-content-center'>
+    <div className='card flex flex-wrap gap-2 justify-content-center justify-content-around w-full'>
       <Button type='submit' icon='pi pi-check' label='Save' />
       <Button
         type='button'

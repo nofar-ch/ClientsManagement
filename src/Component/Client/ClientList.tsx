@@ -1,7 +1,7 @@
 import { DataTable } from 'primereact/datatable';
-import { Column, ColumnBodyOptions } from 'primereact/column';
+import { Column, ColumnProps } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { ClientForm } from './ClientForm';
 import { Dialog, DialogProps } from 'primereact/dialog';
@@ -13,21 +13,9 @@ import { DeleteClient } from '../../Model/Client/DeleteClient.model';
 import { ConfirmForm } from '../Common/Form/ConfirmForm';
 import { ClientDto } from '../../Model/Client/ClientDto.model';
 import { BaseResponseDto } from '../../Model/Response/BaseResponseDto.model';
-import { OverlayPanel } from 'primereact/overlaypanel';
 import { GeoLocation } from './GeoLocation';
-
-type lazyParamsType = {
-  page: number;
-  size: number;
-  filters:
-    | {
-        id: { value: string | null; matchMode: string };
-        fullName: { value: string | null; matchMode: string };
-        phoneNumber: { value: string | null; matchMode: string };
-        ipAddress: { value: string | null; matchMode: string };
-      }
-    | {};
-};
+import { LazyParamsType } from '../../Types/Common/LazyParamsType';
+import { classNames } from 'primereact/utils';
 
 export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);
@@ -35,7 +23,10 @@ export const ClientList = () => {
   const [dialogProps, setDialogProps] = useState<Partial<DialogProps>>();
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [filters, setFilters] = useState<lazyParamsType['filters']>({});
+  const [filters, setFilters] = useState<LazyParamsType['filters']>({});
+  const toastRef = useRef<Toast>(null);
+
+  const baseUrl = 'http://localhost:5071/api/Client';
 
   const initialLazyParams = {
     page: configData.PAGE,
@@ -44,122 +35,155 @@ export const ClientList = () => {
   };
 
   const [lazyParams, setLazyParams] =
-    useState<lazyParamsType>(initialLazyParams);
+    useState<LazyParamsType>(initialLazyParams);
 
-  const toastRef = useRef<Toast>(null);
-  const op = useRef<OverlayPanel>(null);
+  const getDefaultColumnProps = (field: any) => {
+    const columnProps: ColumnProps = {
+      field: field,
+      header: field.charAt(0).toUpperCase() + field.slice(1),
+      style: { width: '23%' },
+      showFilterMenu: false,
+      filter: true,
+      showClearButton: false,
+    };
+    return columnProps;
+  };
 
   useEffect(() => {
-    fetchClientData(lazyParams);
-  }, [lazyParams]);
+    const delayDebounceFn = setTimeout(() => {
+      setLazyParams((prev) => ({ ...prev, filters: filters }));
+    }, 500);
 
-  const fetchClientData = (lazyParams: lazyParamsType) => {
-    setIsLoading(true);
-    const _filters = objectToQueryString();
-    debugger;
-    fetch(
-      `http://localhost:5071/api/Client?page=${lazyParams.page}&size=${lazyParams.size}&${_filters}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    return () => {
+      clearTimeout(delayDebounceFn);
+    };
+  }, [filters]);
+
+  const filtersToQueryString = useCallback(() => {
+    const queryString = Object.keys(lazyParams.filters)
+      .filter((key) => lazyParams.filters[key].value !== null)
+      .map(
+        (key) =>
+          `filter${encodeURIComponent(key)}=${encodeURIComponent(
+            lazyParams.filters[key].value
+          )}`
+      )
+      .join('&');
+
+    return queryString;
+  }, [lazyParams.filters]);
+
+  const fetchClientData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const _filters = filtersToQueryString();
+      const response = await fetch(
+        `${baseUrl}?page=${lazyParams.page}&size=${lazyParams.size}&${_filters}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data: BaseResponseDto<ClientDto>) => {
-        if (data.isSuccess) {
-          setValues(data?.data ?? []);
-          setTotalCount(data?.totalCount);
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching client data:', error);
-        setIsLoading(false);
-      });
-  };
+
+      const data: BaseResponseDto<ClientDto> = await response.json();
+
+      if (data.isSuccess) {
+        setValues(data?.data ?? []);
+        setTotalCount(data?.totalCount);
+      }
+    } catch (error) {
+      console.error('Error fetching client data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filtersToQueryString, lazyParams.page, lazyParams.size]);
+
+  useEffect(() => {
+    fetchClientData();
+  }, [fetchClientData, lazyParams]);
 
   const addClient: SubmitHandler<ClientFormView> = async (client) => {
     const newClient = new CreateClient(client);
-    fetch('http://localhost:5071/api/Client/AddClient', {
-      method: 'POST',
-      body: JSON.stringify(newClient),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          toastRef?.current?.show({
-            severity: 'error',
-            summary: 'Failed',
-            detail: 'Save failed',
-          });
-        }
-        return response.json();
-      })
-      .then((data: BaseResponseDto<ClientDto>) => {
-        if (data.isSuccess) {
-          toastRef?.current?.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Client added',
-          });
-          setDialogContent(null);
-          setLazyParams(initialLazyParams);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching client data:', error);
+    try {
+      const response = await fetch(`${baseUrl}/AddClient`, {
+        method: 'POST',
+        body: JSON.stringify(newClient),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+
+      if (!response.ok) {
+        throw new Error('Save failed');
+      }
+
+      const data: BaseResponseDto<ClientDto> = await response.json();
+
+      if (data.isSuccess) {
+        toastRef?.current?.show({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Client added',
+        });
+        setDialogContent(null);
+        setLazyParams(initialLazyParams);
+      }
+    } catch (error) {
+      console.error('Error fetching client data:', error);
+      toastRef?.current?.show({
+        severity: 'error',
+        summary: 'Failed',
+        detail: 'Save failed',
+      });
+    }
   };
 
-  const deleteClient = (clientId: string) => {
-    if (clientId) {
-      const clientDelete = new DeleteClient(clientId);
-      fetch('http://localhost:5071/api/Client/deleteClient', {
+  const deleteClient = async (clientId: string) => {
+    if (!clientId) {
+      console.error('client id not found');
+      return;
+    }
+
+    const clientDelete = new DeleteClient(clientId);
+
+    try {
+      const response = await fetch(`${baseUrl}/deleteClient`, {
         method: 'DELETE',
         body: JSON.stringify(clientDelete),
         headers: {
           'Content-Type': 'application/json',
         },
-      })
-        .then((response) => {
-          if (!response.ok) {
-            toastRef?.current?.show({
-              severity: 'error',
-              summary: 'Failed',
-              detail: 'Delete client failed',
-            });
-          }
-          return response.json();
-        })
-        .then((data: BaseResponseDto<ClientDto>) => {
-          if (data.isSuccess) {
-            toastRef?.current?.show({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'Client deleted',
-            });
-            setDialogContent(null);
-            setLazyParams(initialLazyParams);
-          }
-        })
-        .catch((error) => {
-          toastRef?.current?.show({
-            severity: 'error',
-            summary: 'Failed',
-            detail: 'Delete client failed',
-          });
+      });
+
+      if (!response.ok) {
+        throw new Error('Delete client failed');
+      }
+
+      const data: BaseResponseDto<ClientDto> = await response.json();
+
+      if (data.isSuccess) {
+        toastRef?.current?.show({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Client deleted',
         });
-    } else {
-      console.error('client id not found');
+        setDialogContent(null);
+        setLazyParams(initialLazyParams);
+      } else {
+        throw new Error('Delete client failed');
+      }
+    } catch (error) {
+      toastRef?.current?.show({
+        severity: 'error',
+        summary: 'Failed',
+        detail: 'Delete client failed',
+      });
     }
   };
 
@@ -184,30 +208,6 @@ export const ClientList = () => {
     );
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      setLazyParams({ ...lazyParams, filters: filters });
-    }, 500);
-
-    return () => {
-      clearTimeout(delayDebounceFn);
-    };
-  }, [filters]);
-
-  const objectToQueryString = () => {
-    const queryString = Object.keys(lazyParams.filters)
-      .filter((key) => lazyParams.filters[key].value !== null)
-      .map(
-        (key) =>
-          `filter${encodeURIComponent(key)}=${encodeURIComponent(
-            lazyParams.filters[key].value
-          )}`
-      )
-      .join('&');
-
-    return queryString;
-  };
-
   return (
     <>
       <Toast ref={toastRef} />
@@ -218,65 +218,61 @@ export const ClientList = () => {
           value={values}
           dataKey='id'
           paginator
+          responsiveLayout='stack'
           loading={isLoading}
           filterDisplay='row'
           first={lazyParams.page}
           rows={lazyParams.size}
           totalRecords={totalCount}
           onPage={(event) => {
-            setLazyParams({
-              ...lazyParams,
-              page: event.page ?? lazyParams.page,
-            });
+            setLazyParams((prev) => ({
+              ...prev,
+              page: event.page ?? prev.page,
+            }));
           }}
           onFilter={(event) => setFilters(event.filters)}
-          tableStyle={{ minWidth: '40rem' }}
         >
+          <Column {...getDefaultColumnProps('id')}></Column>
+          <Column {...getDefaultColumnProps('fullName')}></Column>
+          <Column {...getDefaultColumnProps('phoneNumber')}></Column>
           <Column
-            field='id'
-            header='Id'
-            style={{ width: '25%' }}
-            showFilterMenu={false}
-            filter
-          ></Column>
-          <Column
-            field='fullName'
-            header='FullName'
-            showFilterMenu={false}
-            style={{ width: '25%' }}
-            filter
-          ></Column>
-          <Column
-            field='phoneNumber'
-            header='PhoneNumber'
-            showFilterMenu={false}
-            style={{ width: '25%' }}
-            filter
-          ></Column>
-          <Column
-            field='ipAddress'
-            header='IpAddress'
-            showFilterMenu={false}
-            style={{ width: '25%' }}
-            filter
-            body={(client: ClientDto) => (
-              <>
-                {client.ipAddress}
-                <GeoLocation ipAddress={client.ipAddress} />
-              </>
-            )}
+            {...getDefaultColumnProps('ipAddress')}
+            body={(client: ClientDto) => {
+              return (
+                <div className='flex justify-content-between'>
+                  {client.ipAddress}
+                  <Button
+                    style={{ width: '1.6rem', height: '1.5rem' }}
+                    className='p-button-text border-circle border-primary-400 mx-1'
+                    icon='pi pi-info'
+                    onClick={() => {
+                      setDialogProps({
+                        header: (
+                          <span className='text-xl font-semibold pb-1'>
+                            {client.ipAddress}
+                          </span>
+                        ),
+                      });
+                      setDialogContent(
+                        <GeoLocation ipAddress={client.ipAddress} />
+                      );
+                    }}
+                  />
+                </div>
+              );
+            }}
           ></Column>
           <Column
             field='actions'
             showFilterMenu={false}
-            header={(options) => (
+            header={() => (
               <Button
                 onClick={() => showAddClientForm()}
                 icon='pi pi-plus'
                 className={'p-button-text'}
               />
             )}
-            style={{ width: '25%' }}
+            style={{ width: '8%' }}
             body={(client: ClientDto) => {
               return (
                 <div className='flex'>
@@ -292,10 +288,11 @@ export const ClientList = () => {
         </DataTable>
 
         <Dialog
-          {...dialogProps}
           visible={!!dialogContent}
-          style={{ width: '35vw' }}
+          style={{ width: '30rem' }}
           onHide={() => setDialogContent(null)}
+          dismissableMask
+          {...dialogProps}
         >
           {dialogContent}
         </Dialog>

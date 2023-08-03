@@ -16,10 +16,9 @@ export const ConfirmForm = ({
       onSubmit={() => onSubmitFun(clientId)}
     >
       <span className='text-xl'>{`Id ${clientId} will delete`}</span>
-      <span className='text-xl font-semibold'>Are you sure?</span>
-      <div className='mt-4'>
-        <FooterContent cancelFun={cancelFun} />
-      </div>
+      <span className='text-xl font-semibold mb-4'>Are you sure?</span>
+
+      <FooterContent cancelFun={cancelFun} />
     </form>
   );
 };

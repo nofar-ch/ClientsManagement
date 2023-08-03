@@ -16,16 +16,9 @@ export const ClientForm = ({
     control,
     formState: { errors },
     handleSubmit,
-    reset,
   } = useForm({
     defaultValues: new ClientFormView(formModel),
   });
-
-  // useEffect(() => {
-  //   return () => {
-  //     reset();
-  //   };
-  // }, []);
 
   const getErrorMessage = (fieldName: keyof ClientFormView) => {
     console.log(errors);
@@ -54,7 +47,9 @@ export const ClientForm = ({
           maxLength: { value: 10, message: 'Must contain 10 numbers' },
           pattern: { value: /^[0-9]*$/, message: 'Must contain only numbers' },
         }}
-        render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
+        render={({ field }) => (
+          <InputText {...field} className='w-full h-2rem' />
+        )}
       />
       {getErrorMessage('id')}
 
@@ -68,7 +63,9 @@ export const ClientForm = ({
           required: 'This field is required',
           validate: (value) => value?.includes(' ') || 'Must contain full name',
         }}
-        render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
+        render={({ field }) => (
+          <InputText {...field} className='w-full h-2rem' />
+        )}
       />
       {getErrorMessage('fullName')}
 
@@ -84,7 +81,9 @@ export const ClientForm = ({
           maxLength: { value: 10, message: 'Must contain maximum 10 numbers' },
           pattern: { value: /^[0-9]*$/, message: 'Must contain only numbers' },
         }}
-        render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
+        render={({ field }) => (
+          <InputText {...field} className='w-full h-2rem' />
+        )}
       />
       {getErrorMessage('phoneNumber')}
 
@@ -102,12 +101,13 @@ export const ClientForm = ({
             message: 'Invalid address',
           },
         }}
-        render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
+        render={({ field }) => (
+          <InputText {...field} className='w-full h-2rem mb-4' />
+        )}
       />
       {getErrorMessage('ipAddress')}
-      <div className='my-4'>
-        <FooterContent cancelFun={hideDialog} />
-      </div>
+
+      <FooterContent cancelFun={hideDialog} />
     </form>
   );
 };
