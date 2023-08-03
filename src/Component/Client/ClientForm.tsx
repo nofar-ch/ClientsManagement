@@ -8,35 +8,36 @@ export const ClientForm = ({
   onSubmitFun,
   hideDialog,
 }: {
-  onSubmitFun: SubmitHandler<ClientDto>;
+  onSubmitFun: SubmitHandler<ClientFormView>;
   hideDialog: () => void;
 }) => {
+  const formModel = new ClientFormView();
+
   const {
     control,
     formState: { errors },
     handleSubmit,
     reset,
-    getValues,
   } = useForm({
-    defaultValues: new ClientFormView(),
+    defaultValues: new ClientFormView(formModel),
   });
 
-  console.log(getValues());
+  // useEffect(() => {
+  //   return () => {
+  //     reset();
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
-
-  const getErrorMessage = (fieldName: string) => {
+  const getErrorMessage = (fieldName: keyof ClientFormView) => {
     console.log(errors);
+
     return (
-      fieldName && (
+      errors[fieldName] && (
         <small className='p-error'>{errors[fieldName]?.message}</small>
       )
     );
   };
+
   return (
     <form
       className='flex flex-column justify-content-start align-items-start'
@@ -48,10 +49,15 @@ export const ClientForm = ({
       <Controller
         name='id'
         control={control}
-        rules={{ required: 'This field is required' }}
+        rules={{
+          required: 'This field is required',
+          minLength: { value: 10, message: 'Must contain 10 numbers' },
+          maxLength: { value: 10, message: 'Must contain 10 numbers' },
+          pattern: { value: /^[0-9]*$/, message: 'Must contain only numbers' },
+        }}
         render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
       />
-      {errors.id && getErrorMessage('id')}
+      {getErrorMessage('id')}
 
       <label htmlFor='id' className='mb-1 mt-2'>
         Full Name
@@ -59,10 +65,13 @@ export const ClientForm = ({
       <Controller
         name='fullName'
         control={control}
-        rules={{ required: 'This field is required' }}
+        rules={{
+          required: 'This field is required',
+          validate: (value) => value?.includes(' ') || 'Must contain full name',
+        }}
         render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
       />
-      {errors.fullName && getErrorMessage('fullName')}
+      {getErrorMessage('fullName')}
 
       <label htmlFor='phoneNumber' className='mb-1 mt-2'>
         Phone Number
@@ -70,10 +79,15 @@ export const ClientForm = ({
       <Controller
         name='phoneNumber'
         control={control}
-        rules={{ required: 'This field is required' }}
+        rules={{
+          required: 'This field is required',
+          minLength: { value: 9, message: 'Must contain minimum 9 numbers' },
+          maxLength: { value: 10, message: 'Must contain maximum 10 numbers' },
+          pattern: { value: /^[0-9]*$/, message: 'Must contain only numbers' },
+        }}
         render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
       />
-      {errors.phoneNumber && getErrorMessage('phoneNumber')}
+      {getErrorMessage('phoneNumber')}
 
       <label htmlFor='ipAddress' className='mb-1 mt-2'>
         Ip Address
@@ -81,10 +95,17 @@ export const ClientForm = ({
       <Controller
         name='ipAddress'
         control={control}
-        rules={{ required: 'This field is required' }}
+        rules={{
+          required: 'This field is required',
+          pattern: {
+            value:
+              /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+            message: 'Invalid address',
+          },
+        }}
         render={({ field }) => <InputText {...field} className='w-7 h-2rem' />}
       />
-      {errors.ipAddress && getErrorMessage('ipAddress')}
+      {getErrorMessage('ipAddress')}
       <div className='my-4'>
         <FooterContent cancelFun={hideDialog} />
       </div>

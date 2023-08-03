@@ -5,25 +5,50 @@ import { useEffect, useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { ClientForm } from './ClientForm';
 import { Dialog } from 'primereact/dialog';
-import { FooterContent } from '../Common/Form/FooterContent';
+import { ClientFormView } from '../../Model/Client/ClientFormView.model';
+import { SubmitHandler } from 'react-hook-form';
+import { CreateClient } from '../../Model/Client/CreateClient.model';
+import configData from '../Common/Config/config.json';
+import { DeleteClient } from '../../Model/Client/DeleteClient.model';
+
+type lazyParamsType = {
+  page: number;
+  size: number;
+  sortBy: string;
+};
 
 export const ClientList = () => {
   const [values, setValues] = useState<ClientDto[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
+  const initialLazyParams = {
+    page: configData.PAGE,
+    size: configData.SIZE,
+    sortBy: configData.SORT_BY,
+  };
+  console.log(initialLazyParams);
+
+  const [lazyParams, setLazyParams] =
+    useState<lazyParamsType>(initialLazyParams);
 
   const toastRef = useRef<Toast>(null);
 
   useEffect(() => {
-    fetchClientData();
+    fetchClientData(lazyParams);
   }, []);
 
-  const fetchClientData = () => {
-    fetch('http://localhost:5071/api/Client?page=0&size=10', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+  const fetchClientData = (lazyParams: lazyParamsType) => {
+    fetch(
+      `http://localhost:5071/api/Client?
+      page=${lazyParams.page}
+      &size=${lazyParams.size}
+      &sortby=${lazyParams.sortBy}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -40,17 +65,22 @@ export const ClientList = () => {
       });
   };
 
-  const addClient = (client: ClientDto) => {
+  const addClient: SubmitHandler<ClientFormView> = async (client) => {
+    const newClient = new CreateClient(client);
     fetch('http://localhost:5071/api/Client/AddClient', {
       method: 'POST',
-      body: JSON.stringify(client),
+      body: JSON.stringify(newClient),
       headers: {
         'Content-Type': 'application/json',
       },
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          toastRef?.current?.show({
+            severity: 'error',
+            summary: 'Failed',
+            detail: 'Save failed',
+          });
         }
         return response.json();
       })
@@ -61,6 +91,8 @@ export const ClientList = () => {
             summary: 'Success',
             detail: 'Client added',
           });
+          setVisible(false);
+          fetchClientData(initialLazyParams);
         }
       })
       .catch((error) => {
@@ -69,9 +101,10 @@ export const ClientList = () => {
   };
 
   const deleteClient = (client: ClientDto) => {
+    const clientDelete = new DeleteClient(client.id);
     fetch('http://localhost:5071/api/Client/deleteClient', {
       method: 'DELETE',
-      body: client.id,
+      body: JSON.stringify(clientDelete),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -87,8 +120,10 @@ export const ClientList = () => {
           toastRef?.current?.show({
             severity: 'success',
             summary: 'Success',
-            detail: 'Client added',
+            detail: 'Client deleted',
           });
+          setVisible(false);
+          fetchClientData(initialLazyParams);
         }
       })
       .catch((error) => {
@@ -108,11 +143,9 @@ export const ClientList = () => {
         <DataTable
           value={values}
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rows={lazyParams.size}
           tableStyle={{ minWidth: '50rem' }}
         >
-          <Column field='name' header='Name' style={{ width: '25%' }}></Column>
           <Column field='id' header='Id' style={{ width: '25%' }}></Column>
           <Column
             field='fullName'
@@ -144,7 +177,7 @@ export const ClientList = () => {
                 <div className='flex'>
                   <Button
                     onClick={() => deleteClient(client)}
-                    icon='pi pi-times'
+                    icon='pi pi-times text-red-500'
                     className='p-button-text'
                   />
                 </div>

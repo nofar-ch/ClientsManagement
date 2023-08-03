@@ -1,11 +1,12 @@
+import { ClientFormView } from "./ClientFormView.model";
 
-class CreateClient {
+export class CreateClient {
     id!: string;
     fullName!: string;
     phoneNumber!: string;
     ipAddress!: string;
 
-    constructor(data: CreateClient) {
+    constructor(data: ClientFormView) {
         Object.assign(this, data)
     }
 } 

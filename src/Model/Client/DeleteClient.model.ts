@@ -1,8 +1,8 @@
 
-class DeleteClient {
+export class DeleteClient {
     public id!: string;
 
-    constructor(data: UpdateClient) {
-        Object.assign(this, data)
+    constructor(id: string) {
+        this.id = id;
     }
 } 
