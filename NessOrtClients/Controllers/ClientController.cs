@@ -24,28 +24,40 @@ namespace NessOrtClients.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ClientDto>> GetClients(int page, int size)
+        public async Task<ActionResult<BaseResponseDto<ClientDto>>> GetClients(int page, int size,
+         string? filterId = null,
+         string? filterFullName = null,
+         string? filterPhoneNumber = null,
+         string? filterIpAddress = null)
         {
-            var response = await _mediator.Send(new GetClientQuery { Page = page, Size = size });
+            var response = await _mediator.Send(new GetClientQuery
+            {
+                Page = page,
+                Size = size,
+                Id = filterId,
+                FullName = filterFullName,
+                PhoneNumber = filterPhoneNumber,
+                IpAddress = filterIpAddress
+            });
             return Ok(response);
         }
 
         [HttpPost("AddClient", Name = "AddClient")]
-        public async Task<ActionResult<BaseResponseDto>> AddClients([FromBody] CreateClientCommand command)
+        public async Task<ActionResult<ResponseContent>> AddClients([FromBody] CreateClientCommand command)
         {
             var response = await _mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPost("UpdateClient", Name = "UpdateClient")]
-        public async Task<ActionResult<BaseResponseDto>> UpdateClients([FromBody] UpdateClientCommand command)
+        [HttpPut("UpdateClient", Name = "UpdateClient")]
+        public async Task<ActionResult<ResponseContent>> UpdateClient([FromBody] UpdateClientCommand command)
         {
             var response = await _mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPost("DeleteClient", Name = "DeleteClient")]
-        public async Task<ActionResult<BaseResponseDto>> DeleteClients([FromBody] DeleteClientCommand command)
+        [HttpDelete("DeleteClient", Name = "DeleteClient")]
+        public async Task<ActionResult<ResponseContent>> DeleteClient([FromBody] DeleteClientCommand command)
         {
             var response = await _mediator.Send(command);
             return Ok(response);

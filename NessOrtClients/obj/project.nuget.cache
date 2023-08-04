@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "XNFNK8bui4eZODuDkUCqgO2BCtTBBrWcUgg+b20XDpiYisId2wIT/v0XkVWcEN+BxlwxC5iW6m5X4XfBznEGTw==",
+  "dgSpecHash": "JrGahsi+xdLd/vAVENMDtdXbtrbWVFl+etZIL8UErq4vv1Piqv+oRnR5aKoTK8XVQlJnKcsPSw9NDFmYz9kC2w==",
   "success": true,
   "projectFilePath": "C:\\Users\\nofar\\source\\repos\\NessOrtClients\\NessOrtClients\\NessOrtClients.csproj",
   "expectedPackageFiles": [
@@ -56,6 +56,7 @@
     "C:\\Users\\nofar\\.nuget\\packages\\microsoft.win32.systemevents\\5.0.0\\microsoft.win32.systemevents.5.0.0.nupkg.sha512",
     "C:\\Users\\nofar\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\nofar\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
+    "C:\\Users\\nofar\\.nuget\\packages\\predicatebuilder\\1.0.0\\predicatebuilder.1.0.0.nupkg.sha512",
     "C:\\Users\\nofar\\.nuget\\packages\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\nofar\\.nuget\\packages\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\nofar\\.nuget\\packages\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",

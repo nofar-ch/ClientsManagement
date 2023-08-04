@@ -895,6 +895,18 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
+      "PredicateBuilder/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
+        },
+        "compile": {
+          "lib/netstandard1.0/PredicateBuilder.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/PredicateBuilder.dll": {}
+        }
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
         "type": "package",
         "runtimeTargets": {
@@ -3879,6 +3891,18 @@
         "dotnet_library_license.txt",
         "netstandard.library.1.6.1.nupkg.sha512",
         "netstandard.library.nuspec"
+      ]
+    },
+    "PredicateBuilder/1.0.0": {
+      "sha512": "LRmXTr9wMBnc8C0j+D3nRb4SwxgW4aW03NGJ/YBb+WWDFdGNnI4tym3ZXWZi1Bc09t4dfSFIG1R5akFI3aKVgQ==",
+      "type": "package",
+      "path": "predicatebuilder/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard1.0/PredicateBuilder.dll",
+        "predicatebuilder.1.0.0.nupkg.sha512",
+        "predicatebuilder.nuspec"
       ]
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
@@ -7889,7 +7913,9 @@
       "Microsoft.EntityFrameworkCore.SqlServer >= 7.0.9",
       "Microsoft.EntityFrameworkCore.SqlServer.Design >= 1.1.6",
       "Microsoft.EntityFrameworkCore.Tools >= 7.0.9",
-      "Swashbuckle.AspNetCore >= 6.5.0"
+      "PredicateBuilder >= 1.0.0",
+      "Swashbuckle.AspNetCore >= 6.5.0",
+      "System.Linq.Expressions >= 4.3.0"
     ]
   },
   "packageFolders": {
@@ -7966,9 +7992,17 @@
             "target": "Package",
             "version": "[7.0.9, )"
           },
+          "PredicateBuilder": {
+            "target": "Package",
+            "version": "[1.0.0, )"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.5.0, )"
+          },
+          "System.Linq.Expressions": {
+            "target": "Package",
+            "version": "[4.3.0, )"
           }
         },
         "imports": [

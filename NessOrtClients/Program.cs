@@ -19,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AppServiceMediator();
 
 builder.Services.AddDbContext<DataContext>(options =>
@@ -27,6 +28,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 
 var app = builder.Build();
+app.UseCors("AllowReactApp");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

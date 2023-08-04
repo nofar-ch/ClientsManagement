@@ -16,7 +16,9 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "7.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer.Design": "1.1.6",
           "Microsoft.EntityFrameworkCore.Tools": "7.0.9",
-          "Swashbuckle.AspNetCore": "6.5.0"
+          "PredicateBuilder": "1.0.0",
+          "Swashbuckle.AspNetCore": "6.5.0",
+          "System.Linq.Expressions": "4.3.0"
         },
         "runtime": {
           "NessOrtClients.dll": {}
@@ -625,6 +627,17 @@
           "System.Threading.Timer": "4.3.0",
           "System.Xml.ReaderWriter": "4.3.0",
           "System.Xml.XDocument": "4.3.0"
+        }
+      },
+      "PredicateBuilder/1.0.0": {
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
+        },
+        "runtime": {
+          "lib/netstandard1.0/PredicateBuilder.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
@@ -1795,6 +1808,13 @@
       "sha512": "sha512-WcSp3+vP+yHNgS8EV5J7pZ9IRpeDuARBPN28by8zqff1wJQXm26PVU8L3/fYLBJVU7BtDyqNVWq2KlCVvSSR4A==",
       "path": "netstandard.library/1.6.1",
       "hashPath": "netstandard.library.1.6.1.nupkg.sha512"
+    },
+    "PredicateBuilder/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LRmXTr9wMBnc8C0j+D3nRb4SwxgW4aW03NGJ/YBb+WWDFdGNnI4tym3ZXWZi1Bc09t4dfSFIG1R5akFI3aKVgQ==",
+      "path": "predicatebuilder/1.0.0",
+      "hashPath": "predicatebuilder.1.0.0.nupkg.sha512"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
       "type": "package",

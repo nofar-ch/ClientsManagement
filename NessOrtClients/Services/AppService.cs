@@ -10,6 +10,15 @@ namespace NessOrtClients.Services
     {
         public static IServiceCollection AppServiceMediator(this IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp", builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddMediatR(Assembly.GetExecutingAssembly());
@@ -17,6 +26,7 @@ namespace NessOrtClients.Services
             {
                 cfg.AddProfile<MappingProfile>();
             });
+
 
             return services;
         }

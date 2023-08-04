@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using NessOrtClients.Data;
 using NessOrtClients.Dto;
 using NessOrtClients.Entities;
 
 namespace NessOrtClients.Features.Client.Create.Commands
 {
-    public class CreateClientCommandHandler : IRequestHandler<CreateClientCommand, BaseResponseDto>
+    public class CreateClientCommandHandler : IRequestHandler<CreateClientCommand, ResponseContent>
     {
         private DataContext _context;
         private IMapper _mapper;
@@ -19,11 +20,13 @@ namespace NessOrtClients.Features.Client.Create.Commands
 
         protected CreateClientValidator Validator => new CreateClientValidator();
 
-        public async Task<BaseResponseDto> Handle(CreateClientCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseContent> Handle(CreateClientCommand request, CancellationToken cancellationToken)
         {
             var newItem = _mapper.Map<Entities.Client>(request);
-            await Task.FromResult(_context.AddAsync(newItem));
-            return new BaseResponseDto { IsSuccess = true };
+            newItem.ModifiedDate = DateTime.Now;
+            await _context.AddAsync(newItem);
+            await _context.SaveChangesAsync();
+            return new ResponseContent { IsSuccess = true };
         }
 
     }

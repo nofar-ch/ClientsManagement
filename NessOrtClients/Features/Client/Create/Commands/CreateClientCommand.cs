@@ -3,7 +3,7 @@ using NessOrtClients.Dto;
 
 namespace NessOrtClients.Features.Client.Create.Commands
 {
-    public class CreateClientCommand : IRequest<BaseResponseDto>
+    public class CreateClientCommand : IRequest<ResponseContent>
     {
         public string Id { get; set; }
         public string FullName { get; set; }

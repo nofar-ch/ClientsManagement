@@ -6,7 +6,7 @@ using NessOrtClients.Dto;
 
 namespace NessOrtClients.Features.Client.Delete.Commands
 {
-    public class DeleteClientCommandHandler : IRequestHandler<DeleteClientCommand, BaseResponseDto>
+    public class DeleteClientCommandHandler : IRequestHandler<DeleteClientCommand, ResponseContent>
     {
         private DataContext _context;
         private IMapper _mapper;
@@ -16,19 +16,19 @@ namespace NessOrtClients.Features.Client.Delete.Commands
             _mapper = mapper;
         }
 
-        public async Task<BaseResponseDto> Handle(DeleteClientCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseContent> Handle(DeleteClientCommand request, CancellationToken cancellationToken)
         {
             var existingEntity = await _context.Client.FindAsync(request.Id);
 
             if (existingEntity == null)
             {
-                return new BaseResponseDto { IsSuccess = false };
+                return new ResponseContent { IsSuccess = false };
             }
             var itemToSave = _mapper.Map(request, existingEntity);
             itemToSave.IsDeleted = true;
-            await Task.FromResult(_context.Update(itemToSave));
-            return new BaseResponseDto { IsSuccess = true };
+            _context.Update(itemToSave);
+            await _context.SaveChangesAsync();
+            return new ResponseContent { IsSuccess = true };
         }
-
     }
 }
