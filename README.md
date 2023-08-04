@@ -12,6 +12,6 @@ You can perform the following actions:
 * see the geographic area by IP address
 
 <br/>
-<kbd><img src="/clients-fronted/public/images/appImapge.PNG" height="350"></kbd>
+<kbd><img src="fronted/public/images/appImapge.PNG" height="350"></kbd>
 <br/>
 
