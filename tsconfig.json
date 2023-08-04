@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    /* Language and Environment */
+    "target": "es2016",
+    "module": "esnext" /* Specify what module code is generated. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "moduleResolution": "node",
+    "noResolve": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    //"strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    //"exclude": ["node_modules", "build"],
+    //"moduleResolution": "node",
+    "preserveConstEnums": true,
+    "strict": true
+    //"target": "es2017"
+    //"module": "commonjs"
+  },
+  "include": ["src"]
+}
